@@ -1,5 +1,5 @@
-const API_URL = 'https://your-app.onrender.com/api';  // ← thay URL thật
-const SOCKET_URL = 'https://your-app.onrender.com';
+const API_URL = 'https://chat-app-esdf.onrender.com/api';
+const SOCKET_URL = 'https://chat-app-esdf.onrender.com';
 
 // Kiểm tra đã đăng nhập chưa
 const token = localStorage.getItem('token');
