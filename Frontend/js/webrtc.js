@@ -25,6 +25,7 @@ let localStream = null;
 let currentCallType = null;
 let currentCallerId = null;
 let currentCalleeId = null;
+let pendingCandidates = [];  // buffer ICE candidates
 
 const callModal = new bootstrap.Modal(document.getElementById('callModal'));
 
@@ -46,6 +47,7 @@ async function startCall(callType) {
 
   currentCallType = callType;
   currentCalleeId = currentPartnerId;
+  pendingCandidates = [];
 
   try {
     localStream = await navigator.mediaDevices.getUserMedia({
@@ -117,6 +119,7 @@ async function startCall(callType) {
 socket.on('incoming_call', async ({ callerId, offer, callType }) => {
   currentCallerId = callerId;
   currentCallType = callType;
+  pendingCandidates = [];
 
   document.getElementById('callModalTitle').textContent = callType === 'video' ? '📹 Video call đến' : '📞 Cuộc gọi đến';
   document.getElementById('callStatus').textContent = 'Có cuộc gọi đến...';
@@ -172,6 +175,17 @@ async function answerCall() {
     };
 
     await peerConnection.setRemoteDescription(new RTCSessionDescription(window._pendingOffer));
+
+    // Xử lý ICE candidates đã buffer
+    for (const candidate of pendingCandidates) {
+      try {
+        await peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
+      } catch (e) {
+        console.error('Lỗi thêm buffered candidate:', e);
+      }
+    }
+    pendingCandidates = [];
+
     const answer = await peerConnection.createAnswer();
     await peerConnection.setLocalDescription(answer);
 
@@ -186,16 +200,31 @@ async function answerCall() {
 socket.on('call_answered', async ({ answer }) => {
   if (peerConnection) {
     await peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
+
+    // Xử lý ICE candidates đã buffer
+    for (const candidate of pendingCandidates) {
+      try {
+        await peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
+      } catch (e) {
+        console.error('Lỗi thêm buffered candidate:', e);
+      }
+    }
+    pendingCandidates = [];
   }
 });
 
 socket.on('ice_candidate', async ({ candidate }) => {
-  if (peerConnection && candidate) {
+  if (!candidate) return;
+
+  if (peerConnection && peerConnection.remoteDescription) {
     try {
       await peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
     } catch (error) {
       console.error('Lỗi thêm ICE candidate:', error);
     }
+  } else {
+    // Buffer lại nếu chưa sẵn sàng
+    pendingCandidates.push(candidate);
   }
 });
 
@@ -233,6 +262,7 @@ function endCall() {
   document.getElementById('videoContainer').style.display = 'none';
   document.getElementById('audioCallUI').style.display = 'block';
 
+  pendingCandidates = [];
   currentCallerId = null;
   currentCalleeId = null;
   currentCallType = null;
