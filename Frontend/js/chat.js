@@ -182,6 +182,66 @@ async function addFriend(userId) {
   alert(data.message || data.error);
 }
 
+// Load lời mời kết bạn
+async function showFriendRequests() {
+  const modal = new bootstrap.Modal(document.getElementById('friendRequestModal'));
+  modal.show();
+
+  const data = await apiCall('/users/friend-requests');
+  const requests = data.requests || [];
+  const container = document.getElementById('friendRequestList');
+
+  if (requests.length === 0) {
+    container.innerHTML = '<div class="text-muted text-center">Không có lời mời nào</div>';
+    return;
+  }
+
+  container.innerHTML = requests.map(r => `
+    <div class="d-flex align-items-center justify-content-between p-2 border-bottom">
+      <div class="d-flex align-items-center gap-2">
+        <div class="avatar-sm">${r.username[0].toUpperCase()}</div>
+        <span class="fw-bold">${r.username}</span>
+      </div>
+      <div class="d-flex gap-2">
+        <button class="btn btn-sm btn-success" onclick="acceptRequest('${r.id}')">✓ Chấp nhận</button>
+        <button class="btn btn-sm btn-outline-danger" onclick="rejectRequest('${r.id}')">✗ Từ chối</button>
+      </div>
+    </div>
+  `).join('');
+
+  // Cập nhật số badge
+  document.getElementById('requestCount').textContent = requests.length;
+}
+
+async function acceptRequest(requesterId) {
+  const data = await apiCall('/users/friend-accept', {
+    method: 'POST',
+    body: JSON.stringify({ requesterId })
+  });
+  alert(data.message || data.error);
+  showFriendRequests();  // refresh danh sách
+  loadConversations();   // cập nhật conversation list
+}
+
+async function rejectRequest(requesterId) {
+  await apiCall('/users/friend-reject', {
+    method: 'POST',
+    body: JSON.stringify({ requesterId })
+  });
+  showFriendRequests();
+}
+
+// Tự động check lời mời mỗi 30 giây
+async function checkFriendRequests() {
+  const data = await apiCall('/users/friend-requests');
+  const count = data.requests?.length || 0;
+  document.getElementById('requestCount').textContent = count;
+}
+
+// Gọi khi load trang và mỗi 30 giây
+checkFriendRequests();
+setInterval(checkFriendRequests, 30000);
+
 // ── TẠO NHÓM ──
 async function loadFriendsForGroupModal() {
   const data = await apiCall('/users/friends');

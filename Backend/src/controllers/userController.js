@@ -100,4 +100,21 @@ const getFriends = async (req, res) => {
   }
 };
 
-module.exports = { searchUsers, sendFriendRequest, acceptFriendRequest, getFriends };
+// Lấy danh sách lời mời kết bạn đang chờ
+const getFriendRequests = async (req, res) => {
+  try {
+    const result = await query(
+      `SELECT u.id, u.username, u.avatar_url, f.created_at
+       FROM friendships f
+       JOIN users u ON f.requester_id = u.id
+       WHERE f.addressee_id = $1 AND f.status = 'pending'
+       ORDER BY f.created_at DESC`,
+      [req.userId]
+    );
+    res.json({ requests: result.rows });
+  } catch (error) {
+    res.status(500).json({ error: 'Lỗi lấy lời mời' });
+  }
+};
+
+module.exports = { searchUsers, sendFriendRequest, acceptFriendRequest, getFriends, getFriendRequests };
