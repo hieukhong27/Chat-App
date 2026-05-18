@@ -13,6 +13,19 @@ let currentCalleeId = null;
 
 const callModal = new bootstrap.Modal(document.getElementById('callModal'));
 
+function setRemoteStream(stream) {
+  const remoteVideo = document.getElementById('remoteVideo');
+  const remoteAudio = document.getElementById('remoteAudio');
+  remoteVideo.srcObject = stream;
+  remoteVideo.muted = false;
+  remoteVideo.volume = 1.0;
+  remoteVideo.play().catch(e => console.log('Video play error:', e));
+  remoteAudio.srcObject = stream;
+  remoteAudio.muted = false;
+  remoteAudio.volume = 1.0;
+  remoteAudio.play().catch(e => console.log('Audio play error:', e));
+}
+
 async function startCall(callType) {
   if (!currentPartnerId) return alert('Chọn cuộc trò chuyện 1-1 để gọi');
 
@@ -44,10 +57,7 @@ async function startCall(callType) {
     });
 
     peerConnection.ontrack = (event) => {
-      const remoteVideo = document.getElementById('remoteVideo');
-      remoteVideo.srcObject = event.streams[0];
-      remoteVideo.muted = false;
-      remoteVideo.volume = 1.0;
+      setRemoteStream(event.streams[0]);
       document.getElementById('callStatus').textContent = 'Đã kết nối ✅';
     };
 
@@ -128,10 +138,7 @@ async function answerCall() {
     });
 
     peerConnection.ontrack = (event) => {
-      const remoteVideo = document.getElementById('remoteVideo');
-      remoteVideo.srcObject = event.streams[0];
-      remoteVideo.muted = false;
-      remoteVideo.volume = 1.0;
+      setRemoteStream(event.streams[0]);
     };
 
     peerConnection.onicecandidate = (event) => {
@@ -204,6 +211,8 @@ function endCall() {
     socket.emit('call_end', { targetUserId: currentCallerId });
   }
 
+  const remoteAudio = document.getElementById('remoteAudio');
+  remoteAudio.srcObject = null;
   document.getElementById('remoteVideo').srcObject = null;
   document.getElementById('localVideo').srcObject = null;
   document.getElementById('videoContainer').style.display = 'none';

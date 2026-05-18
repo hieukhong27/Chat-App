@@ -25,8 +25,6 @@
           </div>
           <button class="btn btn-sm btn-outline-danger" onclick="logout()">Đăng xuất</button>
         </div>
-
-        <!-- Tìm kiếm -->
         <div class="mt-2 position-relative">
           <input type="text" id="searchInput" class="form-control form-control-sm"
             placeholder="🔍 Tìm người dùng..." oninput="searchUsers(this.value)">
@@ -34,14 +32,12 @@
         </div>
       </div>
 
-      <!-- Nút xem lời mời -->
       <div class="px-3 pb-2">
         <button class="btn btn-sm btn-outline-warning w-100" onclick="showFriendRequests()">
           🔔 Lời mời kết bạn <span id="requestCount" class="badge bg-warning text-dark ms-1">0</span>
         </button>
       </div>
 
-      <!-- Tạo nhóm -->
       <div class="px-3 pb-2">
         <button class="btn btn-sm btn-outline-secondary w-100" data-bs-toggle="modal"
           data-bs-target="#createGroupModal">
@@ -49,7 +45,6 @@
         </button>
       </div>
 
-      <!-- Danh sách cuộc trò chuyện -->
       <div class="conversation-list" id="conversationList">
         <div class="text-center text-muted p-3 small">Đang tải...</div>
       </div>
@@ -57,8 +52,6 @@
 
     <!-- ── KHU VỰC CHAT ── -->
     <div class="chat-area">
-
-      <!-- Khi chưa chọn conversation -->
       <div class="no-chat-selected" id="noChatSelected">
         <div class="text-center text-muted">
           <div style="font-size: 3rem;">💬</div>
@@ -66,30 +59,21 @@
         </div>
       </div>
 
-      <!-- Khu vực chat đang hoạt động -->
       <div id="activeChatArea" style="display:none; flex-direction:column; height:100%;">
-
-        <!-- Header chat -->
         <div class="chat-header p-3 border-bottom d-flex align-items-center justify-content-between">
           <div>
             <span class="fw-bold" id="chatPartnerName">-</span>
             <div class="small text-muted" id="chatStatus">offline</div>
           </div>
           <div class="d-flex gap-2">
-            <button class="btn btn-sm btn-outline-secondary" onclick="startCall('audio')"
-              title="Gọi thoại">📞</button>
-            <button class="btn btn-sm btn-outline-secondary" onclick="startCall('video')"
-              title="Video call">📹</button>
+            <button class="btn btn-sm btn-outline-secondary" onclick="startCall('audio')" title="Gọi thoại">📞</button>
+            <button class="btn btn-sm btn-outline-secondary" onclick="startCall('video')" title="Video call">📹</button>
           </div>
         </div>
 
-        <!-- Tin nhắn -->
         <div class="messages-container p-3" id="messagesContainer"></div>
-
-        <!-- Đang gõ... -->
         <div class="px-3 text-muted small" id="typingIndicator" style="min-height:20px;"></div>
 
-        <!-- Input gửi tin -->
         <div class="message-input-area p-3 border-top">
           <div class="d-flex gap-2 align-items-end">
             <div class="dropdown">
@@ -107,6 +91,9 @@
     </div>
   </div>
 
+  <!-- Audio element cho gọi thoại -->
+  <audio id="remoteAudio" autoplay playsinline></audio>
+
   <!-- ── MODAL LỜI MỜI KẾT BẠN ── -->
   <div class="modal fade" id="friendRequestModal" tabindex="-1">
     <div class="modal-dialog">
@@ -115,9 +102,7 @@
           <h5 class="modal-title">🔔 Lời mời kết bạn</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
         </div>
-        <div class="modal-body" id="friendRequestList">
-          Đang tải...
-        </div>
+        <div class="modal-body" id="friendRequestList">Đang tải...</div>
       </div>
     </div>
   </div>
@@ -160,10 +145,8 @@
         <div class="modal-body text-center">
           <div id="callStatus" class="text-muted mb-3">Đang kết nối...</div>
 
-          <!-- Video container -->
-          <div class="video-container d-flex gap-2 justify-content-center"
-            id="videoContainer" style="display:none;">
-            <div class="position-relative">
+          <div id="videoContainer" style="display:none;">
+            <div class="position-relative d-inline-block">
               <video id="remoteVideo" autoplay playsinline class="rounded"
                 style="width:400px; background:#000;"></video>
               <video id="localVideo" autoplay muted playsinline class="rounded position-absolute"
@@ -171,7 +154,6 @@
             </div>
           </div>
 
-          <!-- Audio call UI -->
           <div id="audioCallUI" class="py-4">
             <div style="font-size:4rem;">📞</div>
             <div class="mt-2 fw-bold" id="callerName">-</div>
