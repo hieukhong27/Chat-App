@@ -64,22 +64,21 @@ function renderConversationList(conversations) {
     return;
   }
   list.innerHTML = conversations.map(conv => `
-    <div class="conv-item ${conv.id === currentConversationId ? 'active' : ''}"
-         onclick="openConversation('${conv.id}', ${conv.is_group})">
-      <div class="avatar-sm">${conv.is_group ? '👥' : conv.name ? conv.name[0].toUpperCase() : '?'}</div>
-      <div class="flex-1 overflow-hidden">
-        <div class="fw-bold text-truncate">${conv.name || 'Chat'}</div>
-        <div class="text-muted small text-truncate">${conv.last_message || 'Chưa có tin nhắn'}</div>
-      </div>
+  <div class="conv-item ${conv.id === currentConversationId ? 'active' : ''}"
+       onclick="openConversation('${conv.id}', ${conv.is_group}, this)">
+    <div class="avatar-sm">${conv.is_group ? '👥' : conv.name ? conv.name[0].toUpperCase() : '?'}</div>
+    <div class="flex-1 overflow-hidden">
+      <div class="fw-bold text-truncate">${conv.name || 'Chat'}</div>
+      <div class="text-muted small text-truncate">${conv.last_message || 'Chưa có tin nhắn'}</div>
     </div>
-  `).join('');
+  </div>
+`).join('');
 }
 
 // ── MỞ CUỘC TRÒ CHUYỆN ──
-async function openConversation(conversationId, isGroup) {
+async function openConversation(conversationId, isGroup, el) {
   currentConversationId = conversationId;
 
-  // Nếu là chat 1-1, lấy ID người kia
   if (!isGroup) {
     const members = await apiCall(`/messages/conversations/${conversationId}/members`);
     if (members && members.members) {
@@ -89,7 +88,6 @@ async function openConversation(conversationId, isGroup) {
   } else {
     currentPartnerId = null;
   }
-  currentConversationId = conversationId;
 
   document.getElementById('noChatSelected').style.display = 'none';
   document.getElementById('activeChatArea').style.display = 'flex';
@@ -97,7 +95,7 @@ async function openConversation(conversationId, isGroup) {
 
   // Cập nhật active state sidebar
   document.querySelectorAll('.conv-item').forEach(el => el.classList.remove('active'));
-  event.currentTarget.classList.add('active');
+  if (el) el.classList.add('active');  // ← dùng el thay vì event.currentTarget
 
   const data = await apiCall(`/messages/conversations/${conversationId}/messages`);
   renderMessages(data.messages || []);
@@ -197,10 +195,10 @@ async function addFriend(userId) {
 function toggleSidebar() {
   const sidebar = document.querySelector('.sidebar');
   const toggle = document.getElementById('sidebarToggle');
-  
+
   sidebar.classList.toggle('collapsed');
   toggle.classList.toggle('collapsed');
-  
+
   if (sidebar.classList.contains('collapsed')) {
     toggle.textContent = '▶';
     toggle.style.left = '0';
