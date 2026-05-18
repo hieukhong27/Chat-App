@@ -203,8 +203,10 @@ function toggleSidebar() {
   
   if (sidebar.classList.contains('collapsed')) {
     toggle.textContent = '▶';
+    toggle.style.left = '0';
   } else {
     toggle.textContent = '◀';
+    toggle.style.left = '320px';
   }
 }
 

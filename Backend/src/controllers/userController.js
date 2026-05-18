@@ -117,4 +117,19 @@ const getFriendRequests = async (req, res) => {
   }
 };
 
-module.exports = { searchUsers, sendFriendRequest, acceptFriendRequest, getFriends, getFriendRequests };
+// Thêm vào Backend/src/controllers/userController.js
+const rejectFriendRequest = async (req, res) => {
+  try {
+    const { requesterId } = req.body;
+    await query(
+      `DELETE FROM friendships 
+       WHERE requester_id = $1 AND addressee_id = $2 AND status = 'pending'`,
+      [requesterId, req.userId]
+    );
+    res.json({ message: 'Đã từ chối lời mời' });
+  } catch (error) {
+    res.status(500).json({ error: 'Lỗi từ chối lời mời' });
+  }
+};
+
+module.exports = { searchUsers, sendFriendRequest, acceptFriendRequest, getFriends, getFriendRequests, rejectFriendRequest };
