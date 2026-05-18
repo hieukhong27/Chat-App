@@ -194,6 +194,20 @@ async function addFriend(userId) {
   alert(data.message || data.error);
 }
 
+function toggleSidebar() {
+  const sidebar = document.querySelector('.sidebar');
+  const toggle = document.getElementById('sidebarToggle');
+  
+  sidebar.classList.toggle('collapsed');
+  toggle.classList.toggle('collapsed');
+  
+  if (sidebar.classList.contains('collapsed')) {
+    toggle.textContent = '▶';
+  } else {
+    toggle.textContent = '◀';
+  }
+}
+
 // Load lời mời kết bạn
 async function showFriendRequests() {
   const modal = new bootstrap.Modal(document.getElementById('friendRequestModal'));
