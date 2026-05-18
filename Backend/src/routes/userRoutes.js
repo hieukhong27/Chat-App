@@ -1,7 +1,6 @@
 const express = require('express');
 const router = express.Router();
 const { authenticate } = require('../middleware/authMiddleware');
-const { searchUsers, sendFriendRequest, acceptFriendRequest, getFriends } = require('../controllers/userController');
 const { searchUsers, sendFriendRequest, acceptFriendRequest, getFriends, getFriendRequests } = require('../controllers/userController');
 
 router.get('/search', authenticate, searchUsers);
