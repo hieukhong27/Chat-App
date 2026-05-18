@@ -1,12 +1,10 @@
 const { query } = require('../db');
 
-// Lấy lịch sử tin nhắn của một cuộc trò chuyện
 const getMessages = async (req, res) => {
   try {
     const { conversationId } = req.params;
-    const { before, limit = 50 } = req.query;  // hỗ trợ phân trang
+    const { before, limit = 50 } = req.query;
 
-    // Kiểm tra user có quyền xem conversation này không
     const memberCheck = await query(
       'SELECT id FROM conversation_members WHERE conversation_id = $1 AND user_id = $2',
       [conversationId, req.userId]
@@ -25,7 +23,6 @@ const getMessages = async (req, res) => {
     const params = [conversationId];
 
     if (before) {
-      // Load thêm tin nhắn cũ hơn (infinite scroll)
       queryText += ` AND m.created_at < $${params.length + 1}`;
       params.push(before);
     }
@@ -34,20 +31,17 @@ const getMessages = async (req, res) => {
     params.push(parseInt(limit));
 
     const result = await query(queryText, params);
-    // Đảo lại để hiển thị từ cũ → mới
     res.json({ messages: result.rows.reverse() });
   } catch (error) {
     res.status(500).json({ error: 'Lỗi lấy tin nhắn' });
   }
 };
 
-// Lấy danh sách tất cả cuộc trò chuyện của user
 const getConversations = async (req, res) => {
   try {
     const result = await query(
       `SELECT
         c.id, c.name, c.is_group, c.created_at,
-        -- Tin nhắn cuối cùng
         lm.content as last_message,
         lm.created_at as last_message_at,
         lu.username as last_message_sender
@@ -70,4 +64,27 @@ const getConversations = async (req, res) => {
   }
 };
 
-module.exports = { getMessages, getConversations };
+const getConversationMembers = async (req, res) => {
+  try {
+    const { conversationId } = req.params;
+    const memberCheck = await query(
+      'SELECT id FROM conversation_members WHERE conversation_id = $1 AND user_id = $2',
+      [conversationId, req.userId]
+    );
+    if (memberCheck.rows.length === 0) {
+      return res.status(403).json({ error: 'Không có quyền' });
+    }
+    const result = await query(
+      `SELECT cm.user_id, u.username, u.is_online
+       FROM conversation_members cm
+       JOIN users u ON cm.user_id = u.id
+       WHERE cm.conversation_id = $1`,
+      [conversationId]
+    );
+    res.json({ members: result.rows });
+  } catch (error) {
+    res.status(500).json({ error: 'Lỗi lấy thành viên' });
+  }
+};
+
+module.exports = { getMessages, getConversations, getConversationMembers };

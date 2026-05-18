@@ -2,7 +2,7 @@ let currentConversationId = null;
 let currentPartnerId = null;  // cho chat 1-1
 let typingTimer = null;
 
-const EMOJIS = ['😊','😂','❤️','👍','🎉','😍','🤔','😢','😡','👋','🙏','✨','💪','🔥','⭐','🎵','🤣','😅','🥰','😎','🤩','😴','🙄','😮','🥺'];
+const EMOJIS = ['😊', '😂', '❤️', '👍', '🎉', '😍', '🤔', '😢', '😡', '👋', '🙏', '✨', '💪', '🔥', '⭐', '🎵', '🤣', '😅', '🥰', '😎', '🤩', '😴', '🙄', '😮', '🥺'];
 
 // ── KHỞI TẠO ──
 window.addEventListener('DOMContentLoaded', () => {
@@ -79,6 +79,18 @@ function renderConversationList(conversations) {
 async function openConversation(conversationId, isGroup) {
   currentConversationId = conversationId;
 
+  // Nếu là chat 1-1, lấy ID người kia
+  if (!isGroup) {
+    const members = await apiCall(`/messages/conversations/${conversationId}/members`);
+    if (members && members.members) {
+      const partner = members.members.find(m => m.user_id !== currentUser.id);
+      if (partner) currentPartnerId = partner.user_id;
+    }
+  } else {
+    currentPartnerId = null;
+  }
+  currentConversationId = conversationId;
+
   document.getElementById('noChatSelected').style.display = 'none';
   document.getElementById('activeChatArea').style.display = 'flex';
   document.getElementById('messagesContainer').innerHTML = '<div class="text-center text-muted p-3">Đang tải...</div>';
@@ -115,7 +127,7 @@ function createMessageHTML(msg) {
 }
 
 function escapeHtml(text) {
-  return text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
 function scrollToBottom() {
