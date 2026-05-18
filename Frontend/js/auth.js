@@ -1,4 +1,4 @@
-const API_URL = 'https://your-app.onrender.com/api';  // ← thay URL thật khi deploy
+const API_URL = 'https://chat-app-esdf.onrender.com/api';  // ← thay URL thật khi deploy
 
 function showTab(tab) {
   document.getElementById('loginForm').style.display = tab === 'login' ? 'block' : 'none';

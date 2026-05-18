@@ -11,19 +11,31 @@ const groupRoutes = require('./src/routes/groupRoutes');
 const { initSocket } = require('./src/socket/socketHandler');
 
 const app = express();
-const httpServer = http.createServer(app);  // Socket.IO cần dùng HTTP server thuần
+const httpServer = http.createServer(app);
 
 // Cấu hình Socket.IO
 const io = new Server(httpServer, {
   cors: {
-    origin: '*',  // production: thay bằng domain frontend thật
-    methods: ['GET', 'POST']
+    origin: [
+      'https://hieukhong27.github.io',
+      'http://localhost:5500',
+      'http://127.0.0.1:5500'
+    ],
+    methods: ['GET', 'POST'],
+    credentials: true
   }
 });
 
 // Middleware
-app.use(cors());
-app.use(express.json());  // parse JSON body
+app.use(cors({
+  origin: [
+    'https://hieukhong27.github.io',
+    'http://localhost:5500',
+    'http://127.0.0.1:5500'
+  ],
+  credentials: true
+}));
+app.use(express.json());
 
 // Routes
 app.use('/api/auth', authRoutes);
